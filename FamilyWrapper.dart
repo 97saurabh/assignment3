@@ -25,7 +25,7 @@ class Singleton {
   }
   // Required Functinality
   Map<String,dynamic> getParents(int id){
-    Map<String,dynamic> result = _getNodeById(id);
+    Map<String,dynamic> result = getNodeById(id);
     if (result['status']){
     result['parents'] = data["node"].parents.keys.toList();
     result.remove("node");
@@ -33,7 +33,7 @@ class Singleton {
     return result;
   }
   Map<String,dynamic> getChildren(int id){
-    Map<String,dynamic> result = _getNodeById(id);
+    Map<String,dynamic> result = getNodeById(id);
     if (result['status']){
     result['children'] = result["node"].children.keys.toList();
     result.remove("node");
@@ -41,7 +41,7 @@ class Singleton {
     return result;
   }
   Map<String,dynamic> addNode(int id,String name){
-    Map<String,dynamic> result = _getNodeById(id);
+    Map<String,dynamic> result = getNodeById(id);
     if (result['status']){
       result['status'] = false;
       result['message'] = "Node already exist with same id";
@@ -61,7 +61,7 @@ class Singleton {
   
 
   Map<String,dynamic> getAncestorsById(int id){
-    Map<String,dynamic> result = _getNodeById(id);
+    Map<String,dynamic> result = getNodeById(id);
     if (result['status']){
       Family node = result['node'];
       List<Family> ancestors = _getAncestors(node);
@@ -71,11 +71,11 @@ class Singleton {
     return result;
   }
 
-  Map<String,dynamic> getChildrensById(int id){
-    Map<String,dynamic> result = _getNodeById(id);
+  Map<String,dynamic> getDescendantById(int id){
+    Map<String,dynamic> result = getNodeById(id);
     if (result['status']){
       Family node = result['node'];
-      List<Family> children = _getChildren(node);
+      List<Family> children = getDescendant(node);
       result['children'] = children;
       result.remove('node');
     }
@@ -85,8 +85,8 @@ class Singleton {
   Map<String,dynamic> addDependency(int parentId,int childId){
     Map<String,dynamic> result = {'status' : false};
         
-    Map<String,dynamic> parentNode = _getNodeById(parentId);
-    Map<String,dynamic> childNode = _getNodeById(childId);
+    Map<String,dynamic> parentNode = getNodeById(parentId);
+    Map<String,dynamic> childNode = getNodeById(childId);
 
     if (parentNode['status'] == false && childNode['status'] == false ){
       result['message'] = "Parent and Child node does not Exist";
@@ -101,9 +101,9 @@ class Singleton {
       return result;
     }
     else{
-      Family parent = parentNode['node'],child = parentNode['node'];
+      Family parent = parentNode['node'],child = childNode['node'];
       List<Family> parentsNods = _getAncestors(parent);
-      List<Family> childrenNods = _getChildren(child);
+      List<Family> childrenNods = getDescendant(child);
       
       if(! parentsNods.contains(child) && ! childrenNods.contains(parent)){
       parent.children[child] = true;
@@ -119,8 +119,8 @@ class Singleton {
   Map<String,dynamic> deleteDependency(int parentId,int childId){
     Map<String,dynamic> result = {'status' : false};
         
-    Map<String,dynamic> parentNode = _getNodeById(parentId);
-    Map<String,dynamic> childNode = _getNodeById(childId);
+    Map<String,dynamic> parentNode = getNodeById(parentId);
+    Map<String,dynamic> childNode = getNodeById(childId);
 
     if (parentNode['status'] == false && childNode['status'] == false ){
       result['message'] = "Parent and Child node does not Exist";
@@ -137,7 +137,7 @@ class Singleton {
     else{
       Family parent = parentNode['node'],child = parentNode['node'];
       List<Family> parentsNods = _getAncestors(parent);
-      List<Family> childrenNods = _getChildren(child);
+      List<Family> childrenNods = getDescendant(child);
       if (parent.children.containsKey(childrenNods) && child.parents.containsKey(parentsNods)){
       parent.children.remove(child);
       child.parents.remove(parent);
@@ -151,7 +151,7 @@ class Singleton {
     }
   }
   Map<String,dynamic> deleteNode(int id){
-    Map<String,dynamic> result = _getNodeById(id);
+    Map<String,dynamic> result = getNodeById(id);
     if (result['status']){
       Family node = result['node'];
       for (Family key in node.parents.keys){
@@ -170,7 +170,7 @@ class Singleton {
   }
 
   // Private Functions 
-  Map<String,dynamic> _getNodeById(int id){
+  Map<String,dynamic> getNodeById(int id){
     Map<String,dynamic> result = {"status" : false};
     if(data.containsKey(id)){
       result['status'] = true;
@@ -193,22 +193,34 @@ class Singleton {
     return result;
   }
   List<Family> _getAncestors(Family node){
-    List<Family> data = node.parents.keys.toList();
-    for (Family key in node.parents.keys){
-        if (! data.contains(key)){
-            List<Family> arr = _getAncestors(key);
-            data.addAll(arr);
-        }          
+    List<Family> result = [];
+    List<Family>  parents = [];
+    parents = node.parents.keys.toList();
+
+    while (parents.length > 0){
+      Family temp = parents.removeAt(0);
+      if (! result.contains(temp) ){
+        parents.addAll(temp.parents.keys.toList());
+        result.add(temp);
+      }
     }
-    return data;
+    return result;
   }
-  List<Family> _getChildren(Family node){
-    List<Family> data = node.children.keys.toList();
-    for (Family key in node.children.keys){
-        if (! data.contains(key)){
-            data.addAll(_getChildren(key));
-        }  
+  List<Family> getDescendant(Family node){
+
+    //print(".......Getting Children ........");
+    List<Family> result = [];
+    List<Family>  children = [];
+    children = node.children.keys.toList();
+
+    while (children.length > 0){
+      Family temp = children.removeAt(0);
+      if (! result.contains(temp) ){
+        children.addAll(temp.children.keys.toList());
+        result.add(temp);
+      }
     }
-    return data;
+    //print(".......Getting Children ........");
+    return result;
   }
 }
