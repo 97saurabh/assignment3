@@ -85,7 +85,7 @@ class FamilyUtility {
   }
 
   // Add dependencies between two nodes, provided id of two nodes
-  void addDependency(int parentId,int childId){        
+  bool addDependency(int parentId,int childId){        
     Node parentNode = _getNodeById(parentId);
     Node childNode = _getNodeById(childId);
     if (parentNode == null && childNode == null ){
@@ -102,16 +102,18 @@ class FamilyUtility {
       List<Node> childrenNods = _getDescendant(childNode);      
       if(! parentsNods.contains(childNode) && ! childrenNods.contains(parentNode)){
       parentNode.children[childNode] = true;
-      childNode.parents[parentNode] = true;  
+      childNode.parents[parentNode] = true;
+      return true;  
       }
       else{
-        print("Dependency Already Exist");
+        print("Dependency Already Exist,, Creating New Dependencies will give Cyclic Family Structure");
       }
     }
+    return false;
   }
   
   // Delete dependencies between two nodes, provided id of two nodes
-  void deleteDependency(int parentId,int childId){ 
+  bool deleteDependency(int parentId,int childId){ 
     Node parentNode = _getNodeById(parentId);
     Node childNode = _getNodeById(childId);
     if (parentNode == null && childNode == null ){
@@ -124,20 +126,21 @@ class FamilyUtility {
       print("Parent and Child node does not Exist");
     }
     else{
-      List<Node> parentsNods = _getAncestors(parentNode);
-      List<Node> childrenNods = _getDescendant(childNode);
-      if (parentNode.children.containsKey(childrenNods) && childNode.parents.containsKey(parentsNods)){
+      
+      if (parentNode.children.containsKey(childNode) && childNode.parents.containsKey(parentNode)){
       parentNode.children.remove(childNode);
       childNode.parents.remove(parentNode);
+      return true;
     }
       else{
         print("Dependency does not Exist");
       }
     }
+    return false;
   }
 
   // Remove a node and all its dependies
-  void deleteNode(int id){
+  bool deleteNode(int id){
     Node node = _getNodeById(id);
     if (node != null){
       for (Node key in node.parents.keys){
@@ -150,7 +153,9 @@ class FamilyUtility {
       node.children = {};
       _deleteNodeById(id);
       print('Deleted');
+      return true;
     }
+    return false;
   }
 
   // Private Functions

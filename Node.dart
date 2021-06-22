@@ -12,32 +12,39 @@ class Node {
     this.name = name;
   }
   // Setters
-  set node_name(String name){
+  set nodeName(String name){
     this.name = name;
   }
-  set node_id(int id){
+  set nodeId(int id){
     this.id = id;
   }
-  set add_parent(Node parent){
+  set addParent(Node parent){
     this.parents[parent] = true;
     
   }
-  set add_child(Node child){
+  set addChild(Node child){
     this.children[child] = true;
   }
 
   // gettres
-  String get node_name{
+  String get nodeName{
     return this.name;
   }
-  int get node_id{
+  int get nodeId{
     return this.id;
   }
-  List<Node> get add_parents{
+  List<Node> get addParents{
     return this.parents.keys.toList();
     
   }
-  List<Node> get add_children{
+  List<Node> get addChildren{
     return this.children.keys.toList();
-  }    
+  }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return "Node Id:- $id";
+  }
+
 }
